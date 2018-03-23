@@ -1,0 +1,91 @@
+career:
+	id:beggar
+	careerName: "Beggar"
+	careerDescription: "The beggar makes a living by scrounging from kind-hearted (or soft) strangers."
+	minimumLevel: 0
+	status: -7
+	reputation: -7
+	alignment: 0
+	objective:
+		name:"Go Begging"
+		description:"Persuade perfect strangers to give you their spare coins."
+		type:receive
+		item:silver_coin
+		number:20
+		experience:20
+		repeat:-1
+	objective:
+		name:"Wander the Byways"
+		description:"Wander the cold pathways of Vangard visiting distant settlements, where the residents are not yet sick of you pestering them."
+		type:visit
+		entity:settlement
+		number:3
+		experience:20
+		repeat:-1
+	objective:
+		name:"Find a True Companion"
+		description:"Befriend a dog to keep you company as you wander friendless through the world."
+		type:acquire
+		entity:dog
+		number:1
+		experience:20
+	objective:
+		name:"Scavenge the Hedgerows"
+		description:"Collect the wild fruits of the fields and feed yourself."
+		type:acquire
+		item:apple
+		number:10
+		experience:10
+		repeat:-1
+	possession:
+		id:cloak
+		level:-1
+		number:1
+	possession:
+		id:cap
+		level:-1
+		number:1
+	possession:
+		id:wooden_cudgel
+		level:-1
+		number:1
+	possession:
+		id:boots
+		level:-1
+		number:1
+	exit_career:
+		id:hermit
+		level:3
+	exit_career:
+		id:laborer
+		level:2
+	exit_career:
+		id:peasant
+		level:2
+	exit_career:
+		id:footpad
+		level:2
+	skill:
+		id:brawling
+		level:2
+	skill:
+		id:subdue
+		level:2
+	skill:
+		id:skulk
+		level:2
+	skill:
+		id:hardened
+		level:2
+	skill:
+		id:beg
+		level:5
+	skill:
+		id:run
+		level:2
+	skill:
+		id:constitution
+		level:3
+	skill:
+		id:willpower
+		level:2

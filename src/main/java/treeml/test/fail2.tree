@@ -1,0 +1,4 @@
+#result::fail
+#error::Illegal start of a name: } {line 3, position 1}
+}}
+{ { name : value }

@@ -1,0 +1,18 @@
+{
+    career: {
+        id:beggar
+        careerName: "Beggar"
+        alignment: 0
+        objective: {
+            name:"Go Begging"
+            description:"Persuade perfect strangers to give you their spare coins."
+            experience: 20, 40, 60
+            repeat:-1
+        }
+        objective: {
+            name:"Wander the Byways"
+            experience: 20,
+            repeat:-1
+        }
+    }
+}

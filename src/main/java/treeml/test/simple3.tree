@@ -1,0 +1,10 @@
+#result::pass
+#structure::1:1;1:1;2:1;2:2;
+#eval::nm[1].name[1](2)='valueX'
+{
+    nm : value
+    nm : urf {
+        name : value
+        name : value,value,valueX
+    }
+}
