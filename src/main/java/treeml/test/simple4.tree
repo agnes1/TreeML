@@ -1,0 +1,13 @@
+#result::ok
+#structure::1:1;1:1;1:1;1:1;1:2;1:2;1:2;1:2;1:0;
+{
+     string : "This is a \"string\".\r\nThe second line."
+     integer : 1234
+     double : 123.4
+     boolean : true //default is false
+     stringList : "this", "is", "a", "list"
+     integerList : 1, 2, 3, 4
+     doubleList : 1.2, 3.4
+     booleanList : true, false
+     null : null
+}
