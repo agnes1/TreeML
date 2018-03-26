@@ -18,36 +18,63 @@ public class Test {
         //noinspection ConstantConditions
         for (File f : testDir.listFiles()) {
             tl.tags.clear();
+            RootNode doc = null;
             try {
-                Node doc = parser.parse(f);
+                doc = (RootNode)parser.parse(f);
+                boolean failIntended = "fail".equals(tl.tags.get("result"));
+                if (failIntended) {
+                    System.out.println("FAILURE - PARSE RESULT - " + f.getName());
+                    notok++;
+                } else {
+                    System.out.println("PASS    - PARSE RESULT - " + f.getName());
+                    ok++;
+                }
+            } catch (Exception e) {
+                boolean fail = "fail".equals(tl.tags.get("result"));
+                if ( fail && e.getMessage().equals(tl.tags.get("error")) ) {
+                    System.out.println("PASS    - PARSE RESULT - " + f.getName());
+                    ok++;
+                } else {
+                    System.out.println("FAILURE Expected " + tl.tags.get("result") + ", got fail - " + f.getName());
+                    System.out.println("---" + e.getMessage() + "---");
+                    e.printStackTrace();
+                    notok++;
+                }
+            }
+            if (doc != null) {
                 StringBuilder sb = new StringBuilder();
                 int indent = 1;
                 hashStructure(doc, sb, indent);
                 String structure = tl.tags.get("structure");
                 boolean structureMatch = (structure == null || structure.equals(sb.toString()));
-                boolean failIntended = "fail".equals(tl.tags.get("result"));
-                if (failIntended) {
-                    System.out.println("FAILURE Expected fail, got ok - " + f.getName());
-                    notok++;
-                } else if ( ! structureMatch) {
-                    System.out.println("FAILURE Expected ok, got bad structure [" + sb.toString() + "] - " + f.getName());
-                    notok++;
-                } else {
-                    System.out.println("PASS Expected ok, got ok - " + f.getName());
-                    ok++;
-                }
-            } catch (Exception e) {
-                boolean fail = "fail".equals(tl.tags.get("result"));
-                if ( fail
-                        && e.getMessage().equals(tl.tags.get("error")) ) {
-                    System.out.println("PASS Expected fail, got fail - " + f.getName());
+                if (structureMatch) {
+                    System.out.println("PASS    - STRUCTURE    - " + f.getName());
                     ok++;
                 } else {
-                    System.out.println("---" + e.getMessage() + "---");
-                    System.out.println("FAILURE Expected " + tl.tags.get("result") + ", got fail - " + f.getName());
-                    e.printStackTrace();
+                    System.out.println("FAILURE - STRUCTURE    - " + f.getName());
+                    System.out.println(" - expected: " + structure);
+                    System.out.println(" - actual  : " + sb.toString());
                     notok++;
                 }
+                for (String tag : doc.tags) {
+                    String[] nv = tag.split("::");
+                    if (nv[0].equals("eval")) {
+                        String[] v = nv[1].split("=");
+                        String exp1 = v[0];
+                        String exp2 = v[1];
+                        Object value1 = Expression.eval(doc, exp1);
+                        Object value2 = Expression.eval(doc, exp2);
+                        if (value1 == null ? value2 == null : value1.equals(value2)) {
+                            System.out.println("PASS    - EXPRESSION   - " + f.getName());
+                            ok++;
+                        } else {
+                            System.out.println("FAILURE - EXPRESSION   - " + tag);
+                            notok++;
+                        }
+                    }
+                }
+
+
             }
         }
         if (notok > 0) {
