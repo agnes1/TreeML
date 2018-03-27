@@ -18,7 +18,7 @@ public class Parser2 extends ParserBase {
     public final List<Listener> listeners = new ArrayList<>(1);
 
     enum Types {
-        tokenValue, stringValue, longValue, doubleValue
+        tokenValue, stringValue, longValue, timeValue, doubleValue
     }
 
     public static class Options {
@@ -31,6 +31,7 @@ public class Parser2 extends ParserBase {
         }
     }
 
+    @SuppressWarnings("unused")
     public Parser2() {
         options = new Options(false, false, false);
     }
@@ -79,7 +80,7 @@ public class Parser2 extends ParserBase {
             if ((char) c != '\r') {
                 group = group.read(root, (char) c, state);
                 for (Listener listener : state.listeners) {
-                    listener.onCharacter((char)c, state.indent, state.index, state.lineNumber, state.lineIndex, group);
+                    listener.onCharacter((char) c, state.indent, state.index, state.lineNumber, state.lineIndex, group);
                 }
             }
             newline((char) c, state);
@@ -115,7 +116,7 @@ public class Parser2 extends ParserBase {
         if (state.indent > (state.previousIndent + 1)) {
             throw new RuntimeException(String.format("Illegal indent: %s --> %s {line %s, position %s}", state.previousIndent, state.indent, state.lineNumber, state.lineIndex));
         }
-        if ( ! state.streaming) root.append(state.indent, state.node);
+        if (!state.streaming) root.append(state.indent, state.node);
         state.previousIndent = state.indent;
         for (Listener listener : state.listeners) {
             listener.onAddNode(state.node.name, state.indent, state.index, state.lineNumber, state.lineIndex, group);
@@ -333,15 +334,15 @@ public class Parser2 extends ParserBase {
                 state.buffer = new StringBuilder();
                 //throw away opening quote
                 return this;
-            } else if (c == '\\' && ! state.escape) {
+            } else if (c == '\\' && !state.escape) {
                 state.escape = true;
                 return this;
             } else if (c == '\\' && state.escape) {
                 state.escape = false;
                 state.buffer.append(c);
                 return this;
-            } else if (c == '"' && ! state.escape) {
-                return addValue(root, state.buffer.toString(), state, ' ',this);
+            } else if (c == '"' && !state.escape) {
+                return addValue(root, state.buffer.toString(), state, ' ', this);
             } else if (c == '"' && state.escape) {
                 state.escape = false;
                 state.buffer.append(c);
@@ -363,122 +364,152 @@ public class Parser2 extends ParserBase {
         }
     }
 
+    public static class TimeValue implements Group {
+        public static final TimeValue I = new TimeValue();
+        public static final String allowed = "0123456789+-THMSPZ:.";
+
+        @SuppressWarnings("ConstantConditions")
+        @Override
+        public Group read(RootNode root, char c, State state) {
+            if (state.buffer == null) {
+                state.buffer = new StringBuilder();
+                //throw away opening @
+                return this;
+            } else if (allowed.indexOf(c) > -1) {
+                state.buffer.append(c);
+                return this;
+            } else {
+                String value0 = state.buffer.toString();
+                Object value;
+                if (value0.startsWith("P")) {
+                    value = new Period(value0);
+                } else {
+                    value = new DateTime(value0);
+                }
+                return addValue(root, value, state, ' ', this);
+            }
+        }
+    }
+
     private static Group addValue(RootNode root, Object value, State state, char c, Group group) {
         state.node.addValue(value);
         for (Listener listener : state.listeners) {
-            listener.onAddValue(value, state.indent, state.index, state.lineNumber, state.lineIndex, group);
+            listener.onAddValue(value, state.type, state.indent, state.index, state.lineNumber, state.lineIndex, group);
         }
 
         return Group.getGroup(root, c, state, AfterValue.I);
     }
 
-    public static class Value implements Group {
-        public static final Value I = new Value();
+public static class Value implements Group {
+    public static final Value I = new Value();
 
-        @Override
-        public Group read(RootNode root, char c, State state) {
-            if (Token.allowedFirstCharacter.indexOf(c) > -1) {
-                state.type = Types.tokenValue;
-                return Group.getGroup(root, c, state, Token.I);
-            } else if (" \t".indexOf(c) > -1) {
-                return this;
-            } else if (c == '"') {
-                state.type = Types.stringValue;
-                return Group.getGroup(root, c, state, StringValue.I);
-            } else if (c == '\\') {
-                return Group.getGroup(root, c, state, Continuation.I);
-            } else if (NumberValue.allowedFirstCharacter.indexOf(c) > -1) {
-                state.type = Types.longValue;
-                return Group.getGroup(root, c, state, NumberValue.I);
-            } else if (c == '\n') {
-                return Group.getGroup(root, c, state, AfterValue.I);
-            } else if (c == '{' && state.curlySyntax) {
-                return addValue(root, null, state, c,this);
-            } else if (c == '}' && state.curlySyntax) {
-                return addValue(root, null, state, c,this);
-            } else {
-                throw new RuntimeException(String.format("Value invalid start character: %s {line %s, position %s}", c, state.lineNumber, state.lineIndex));
-            }
+    @Override
+    public Group read(RootNode root, char c, State state) {
+        if (Token.allowedFirstCharacter.indexOf(c) > -1) {
+            state.type = Types.tokenValue;
+            return Group.getGroup(root, c, state, Token.I);
+        } else if (" \t".indexOf(c) > -1) {
+            return this;
+        } else if (c == '"') {
+            state.type = Types.stringValue;
+            return Group.getGroup(root, c, state, StringValue.I);
+        } else if (c == '@') {
+            state.type = Types.timeValue;
+            return Group.getGroup(root, c, state, TimeValue.I);
+        } else if (c == '\\') {
+            return Group.getGroup(root, c, state, Continuation.I);
+        } else if (NumberValue.allowedFirstCharacter.indexOf(c) > -1) {
+            state.type = Types.longValue;
+            return Group.getGroup(root, c, state, NumberValue.I);
+        } else if (c == '\n') {
+            return Group.getGroup(root, c, state, AfterValue.I);
+        } else if (c == '{' && state.curlySyntax) {
+            return addValue(root, null, state, c, this);
+        } else if (c == '}' && state.curlySyntax) {
+            return addValue(root, null, state, c, this);
+        } else {
+            throw new RuntimeException(String.format("Value invalid start character: %s {line %s, position %s}", c, state.lineNumber, state.lineIndex));
         }
     }
+}
 
-    public static class AfterValue implements Group {
-        public static final AfterValue I = new AfterValue();
+public static class AfterValue implements Group {
+    public static final AfterValue I = new AfterValue();
 
-        @Override
-        public Group read(RootNode root, char c, State state) {
-            if (c == ' ' || c == '\t') {
+    @Override
+    public Group read(RootNode root, char c, State state) {
+        if (c == ' ' || c == '\t') {
+            return this;
+        } else if (state.curlySyntax && c == '{') {
+            addNode(root, state, this);
+            state.indent++;
+            return Group.getGroup(root, ' ', state, StartOfLine.I);
+        } else if (state.curlySyntax && c == '}') {
+            addNode(root, state, this);
+            state.indent--;
+            return Group.getGroup(root, ' ', state, StartOfLine.I);
+        } else if (c == '\\') {
+            return Group.getGroup(root, c, state, Continuation.I);
+        } else if (c == ',') {
+            return Group.getGroup(root, ' ', state, Value.I);
+        } else if (c == '\n' || c == '/') {
+            addNode(root, state, this);
+            return Group.getGroup(root, c, state, StartOfLine.I);
+        }
+        throw new RuntimeException(String.format("AfterValue not separated by legal character: %s {line %s, position %s}", c, state.lineNumber, state.lineIndex));
+    }
+}
+
+public static class Continuation implements Group {
+    public static final Continuation I = new Continuation();
+
+    @Override
+    public Group read(RootNode root, char c, State state) {
+        if (c == '\\') {
+            state.buffer = new StringBuilder();
+            return this;
+        } else if (c == '\n') {
+            return Group.getGroup(root, ' ', state, Value.I);
+        } else if (c == ' ') {
+            return this;
+        } else {
+            if (!state.curlySyntax && c == '\t' && state.buffer != null) {
+                state.buffer.append(c);
                 return this;
-            } else if (state.curlySyntax && c == '{') {
+            }
+            if (" \t".indexOf(c) == -1) {
                 addNode(root, state, this);
-                state.indent++;
-                return Group.getGroup(root, ' ', state, StartOfLine.I);
-            } else if (state.curlySyntax && c == '}') {
-                addNode(root, state, this);
-                state.indent--;
-                return Group.getGroup(root, ' ', state, StartOfLine.I);
-            } else if (c == '\\') {
-                return Group.getGroup(root, c, state, Continuation.I);
-            } else if (c == ',') {
-                return Group.getGroup(root, ' ', state, Value.I);
-            } else if (c == '\n') {
-                addNode(root, state, this);
+                if (!state.curlySyntax) {
+                    state.indent = state.buffer.length();
+                }
                 return Group.getGroup(root, c, state, StartOfLine.I);
             }
-            throw new RuntimeException(String.format("AfterValue not separated by legal character: %s {line %s, position %s}", c, state.lineNumber, state.lineIndex));
         }
+        throw new RuntimeException(String.format("Continuation not legal character: %s {line %s, position %s}", c, state.lineNumber, state.lineIndex));
     }
+}
 
-    public static class Continuation implements Group {
-        public static final Continuation I = new Continuation();
+public static class Comment implements Group {
+    public static final Comment I = new Comment();
 
-        @Override
-        public Group read(RootNode root, char c, State state) {
-            if (c == '\\') {
-                state.buffer = new StringBuilder();
-                return this;
+    @Override
+    public Group read(RootNode root, char c, State state) {
+        if (state.buffer != null) {
+            if (state.buffer.length() == 1 && '/' != c) {
+                throw new RuntimeException(String.format("Illegal start of a comment: /%s {line %s, position %s}", c, state.lineNumber, state.lineIndex));
+            } else if (state.buffer.length() == 1) {
+                state.buffer.append(c);
             } else if (c == '\n') {
-                return Group.getGroup(root, ' ', state, Value.I);
-            } else if (c == ' ') {
-                return this;
-            } else {
-                if (!state.curlySyntax && c == '\t' && state.buffer != null) {
-                    state.buffer.append(c);
-                    return this;
-                }
-                if (" \t".indexOf(c) == -1) {
-                    addNode(root, state, this);
-                    if (!state.curlySyntax) {
-                        state.indent = state.buffer.length();
-                    }
-                    return Group.getGroup(root, c, state, StartOfLine.I);
-                }
+                state.endStatement();
+                return Group.getGroup(root, c, state, StartOfLine.I);
             }
-            throw new RuntimeException(String.format("Continuation not legal character: %s {line %s, position %s}", c, state.lineNumber, state.lineIndex));
+        } else {
+            if (c != '/')
+                throw new RuntimeException(String.format("Illegal start of a comment: %s {line %s, position %s}", c, state.lineNumber, state.lineIndex));
+            state.buffer = new StringBuilder().append(c);
         }
+        return this;
     }
-
-    public static class Comment implements Group {
-        public static final Comment I = new Comment();
-
-        @Override
-        public Group read(RootNode root, char c, State state) {
-            if (state.buffer != null) {
-                if (state.buffer.length() == 1 && '/' != c) {
-                    throw new RuntimeException(String.format("Illegal start of a comment: /%s {line %s, position %s}", c, state.lineNumber, state.lineIndex));
-                } else if (state.buffer.length() == 1) {
-                    state.buffer.append(c);
-                } else if (c == '\n') {
-                    state.endStatement();
-                    return Group.getGroup(root, c, state, StartOfLine.I);
-                }
-            } else {
-                if (c != '/')
-                    throw new RuntimeException(String.format("Illegal start of a comment: %s {line %s, position %s}", c, state.lineNumber, state.lineIndex));
-                state.buffer = new StringBuilder().append(c);
-            }
-            return this;
-        }
-    }
+}
 
 }

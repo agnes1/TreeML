@@ -18,7 +18,7 @@ public class VerboseListener implements Listener {
     }
 
     @Override
-    public void onAddValue(Object value, int indent, int index, int line, int lineIndex, Parser2.Group currentGroup) {
+    public void onAddValue(Object value, Parser2.Types type, int indent, int index, int line, int lineIndex, Parser2.Group currentGroup) {
         System.out.println("Add value: " + value + " [" + indent + "]");
     }
 }

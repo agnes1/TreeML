@@ -19,7 +19,7 @@ public interface Listener {
     default void onAddNode(String name, int indent, int index, int line, int lineIndex, Parser2.Group currentGroup) {
     }
 
-    default void onAddValue(Object value, int indent, int index, int line, int lineIndex, Parser2.Group currentGroup) {
+    default void onAddValue(Object value, Parser2.Types type, int indent, int index, int line, int lineIndex, Parser2.Group currentGroup) {
     }
 
 }

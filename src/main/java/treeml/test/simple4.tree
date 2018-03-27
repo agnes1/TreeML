@@ -5,7 +5,7 @@
      integer : 1234
      double : 123.4
      boolean : true //default is false
-     //range : @PT3H3M3.456S
+     duration : @PT3H3M3.456S
      //date : @2017-09-18
      //time : @23:04:12+01:00
      //dateTime : @2017-09-18T23:04:12+01:00
