@@ -34,6 +34,12 @@ public class RootNode extends Node {
         for (int i = 0; i < depth; i++) {
             parent = parent.children.get(parent.children.size() - 1);
         }
+        if (parent.children.size() > 0) {
+            Node lastChild = parent.children.get(parent.children.size() - 1);
+            lastChild.next = node;
+            node.previous = node;
+        }
+        node.parent = node;
         parent.children.add(node);
     }
 }
