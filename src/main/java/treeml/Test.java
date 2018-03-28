@@ -46,15 +46,17 @@ public class Test {
                 int indent = 1;
                 hashStructure(doc, sb, indent);
                 String structure = tl.tags.get("structure");
-                boolean structureMatch = (structure == null || structure.equals(sb.toString()));
-                if (structureMatch) {
-                    System.out.println("PASS    - STRUCTURE    - " + f.getName());
-                    ok++;
-                } else {
-                    System.out.println("FAILURE - STRUCTURE    - " + f.getName());
-                    System.out.println(" - expected: " + structure);
-                    System.out.println(" - actual  : " + sb.toString());
-                    notok++;
+                if (structure != null) {
+                    boolean structureMatch = structure.equals(sb.toString());
+                    if (structureMatch) {
+                        System.out.println("PASS    - STRUCTURE    - " + f.getName());
+                        ok++;
+                    } else {
+                        System.out.println("FAILURE - STRUCTURE    - " + f.getName());
+                        System.out.println(" - expected: " + structure);
+                        System.out.println(" - actual  : " + sb.toString());
+                        notok++;
+                    }
                 }
                 for (String tag : doc.tags) {
                     String[] nv = tag.split("::");

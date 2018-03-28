@@ -1,0 +1,4 @@
+#result::fail
+#error::AfterValue not separated by legal character: 4 {line 3, position 18}
+{ name : 1, 2, 3 4
+}

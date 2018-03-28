@@ -1,10 +1,24 @@
 #result::ok
-#structure::1:1;1:2;1:1;1:2;1:1;1:2;1:1;1:2;1:1;1:1;1:1;1:2;1:0;
+#structure::1:1;1:1;1:2;1:1;1:2;1:1;1:2;1:1;1:2;1:1;1:1;1:1;1:2;1:0;
+#eval::integerList(list)=true
+#eval::integerList(0)=1
+#eval::integerList(1)=2
+#eval::integerList(2)=3
+#eval::integerList(3)=4
+#eval::integerList(4)=5
+#eval::integerList(5)=6
+#eval::integerList(6)=7
+#eval::integerList(7)=8
+#eval::booleanList(0)=true
+#eval::booleanList(1)=false
 {
      string : "This is a \"string\".\r\nThe second line."
+     string : "This goes over multi lines:
+And is allowed."
      stringList : "this", "is", "a", "list"
      integer : 1234
-     integerList : 1, 2, 3, 4
+     integerList : 1, 2, 3, 4  \
+                   5, 6, 7, 8
      double : 123.4
      doubleList : 1.2, 3.4
      boolean : true //default is false

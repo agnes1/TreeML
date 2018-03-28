@@ -99,9 +99,9 @@ public class Expression {
                 }
             } else if ("0123456789.+-".contains("" + expression.charAt(0))) {
                 try {
-                    return Double.parseDouble(expression);
-                } catch (Exception e) {
                     return Long.parseLong(expression);
+                } catch (Exception e) {
+                    return Double.parseDouble(expression);
                 }
             }
         } catch (Exception e) {
