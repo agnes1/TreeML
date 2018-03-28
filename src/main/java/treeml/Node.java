@@ -13,6 +13,9 @@ import java.util.List;
 public class Node {
     public String name;
     public Object value;
+    public Node parent;
+    public Node previous;
+    public Node next;
     public List<Node> children = new ArrayList<>();
     public int line;
     private int valueSets = 0;
@@ -37,9 +40,9 @@ public class Node {
 
     public List<Node> getNodes(String name) {
         List<Node> result = new ArrayList<>();
-        for (int i = 0; i < children.size(); i++) {
-            if (name.equals(children.get(i).name)) {
-                result.add(children.get(i));
+        for (Node aChildren : children) {
+            if (name.equals(aChildren.name)) {
+                result.add(aChildren);
             }
         }
         return result;
