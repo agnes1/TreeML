@@ -5,7 +5,7 @@ Micro ML parser with validation and expression language.
 
 | JSON | TreeML |
 |---|---|
-| Number, Boolean, String, Array, Object | Integer, Double, Boolean, Token, String, List |
+| Number, Boolean, String, Array, Object | Integer, Double, Boolean, Token, DateTime, Duration, String, List |
 | Values can be objects | Values and document structure are cleanly separated |
 | Objects are maps (names cannot repeat) | Document is tree of named nodes (names can repeat) |
 | No comments allowed | Comments allowed |
