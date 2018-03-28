@@ -15,9 +15,9 @@ public class Dependency {
 
     private ParserBase parser;
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "WeakerAccess"})
     public Dependency() {
-        parser = new Parser();
+        parser = new Parser2();
     }
 
     @SuppressWarnings("unused")
@@ -44,6 +44,7 @@ public class Dependency {
         logger.warning("Found " + brokenReferences.size() + " errors.");
     }
 
+    @SuppressWarnings("WeakerAccess")
     public Map<Integer, String> checkReferences(String referrer, List<String> referrerPath, DocumentGroup source) throws IOException {
         Comparer comparer = new Comparer();
         comparer.result = new TreeMap<>();
@@ -94,6 +95,7 @@ public class Dependency {
         walker.walk(unique, found, finalStep);
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static void collectValues(boolean unique, Set<Object> result, List<Node> found, String finalStep) {
         if ("nodeName".equals(finalStep)) {
             for (Node node : found) {
@@ -115,7 +117,7 @@ public class Dependency {
     }
 
 
-    public static void compareValues(Map<Integer, String> result, Set<Object> values, List<Node> found, String finalStep) {
+    static void compareValues(Map<Integer, String> result, Set<Object> values, List<Node> found, String finalStep) {
         if ("nodeName".equals(finalStep)) {
             found.stream().filter(node -> !values.contains(node.name)).forEach(node -> result.put(node.line, "L0003: Node name not in source: " + node.name));
         } else if ("nodeValue".equals(finalStep)) {
@@ -126,10 +128,10 @@ public class Dependency {
     }
 
     public static class DocumentGroup {
-        public List<String> documents = new ArrayList<>();
-        public List<String> path = new ArrayList<>();
+        List<String> documents = new ArrayList<>();
+        List<String> path = new ArrayList<>();
 
-        public Set<Object> eval(boolean unique, ParserBase parser) {
+        Set<Object> eval(@SuppressWarnings("SameParameterValue") boolean unique, ParserBase parser) {
             Collector colly = new Collector();
             for (String document : documents) {
                 try {

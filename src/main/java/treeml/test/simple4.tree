@@ -1,17 +1,17 @@
 #result::ok
-#structure::1:1;1:1;1:1;1:1;1:2;1:2;1:2;1:2;1:0;
+#structure::1:1;1:2;1:1;1:2;1:1;1:2;1:1;1:2;1:1;1:1;1:1;1:2;1:0;
 {
      string : "This is a \"string\".\r\nThe second line."
-     integer : 1234
-     double : 123.4
-     boolean : true //default is false
-     duration : @PT3H3M3.456S
-     //date : @2017-09-18
-     //time : @23:04:12+01:00
-     //dateTime : @2017-09-18T23:04:12+01:00
      stringList : "this", "is", "a", "list"
+     integer : 1234
      integerList : 1, 2, 3, 4
+     double : 123.4
      doubleList : 1.2, 3.4
+     boolean : true //default is false
      booleanList : true, false
+     duration : @PT3H3M3.456S
+     date : @2017-09-18
+     time : @23:04:12+01:00
+     dateTime : @2017-09-18T23:04:12+01:00, @2018-09-18T23:04:12+01:00
      null : null
 }

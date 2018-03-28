@@ -17,15 +17,6 @@ public class RootNode extends Node {
         return requires == null ? super.toString() : requires + "\r\n" + super.toString();
     }
 
-    public String toTreeML() {
-        StringBuilder sb = new StringBuilder();
-        int indent = 0;
-        for (Node child : children) {
-            child.toTreeMLImpl(sb, indent);
-        }
-        return sb.toString();
-    }
-
     public void append(int depth, Node node) {
         if (node == null) {
             return;

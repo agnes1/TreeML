@@ -382,11 +382,11 @@ public class Parser2 extends ParserBase {
                 String value0 = state.buffer.toString();
                 Object value;
                 if (value0.startsWith("P")) {
-                    value = new Period(value0);
+                    value = new Duration(value0);
                 } else {
                     value = new DateTime(value0);
                 }
-                return addValue(root, value, state, ' ', this);
+                return addValue(root, value, state, c, this);
             }
         }
     }

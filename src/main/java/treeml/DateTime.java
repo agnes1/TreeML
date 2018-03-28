@@ -1,9 +1,9 @@
 package treeml;
 
-public class Period {
+public class DateTime {
     public final String value;
 
-    public Period(String value) {
+    public DateTime(String value) {
         this.value = value;
     }
 }
