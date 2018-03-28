@@ -1,0 +1,7 @@
+#result::fail
+#error::Illegal indent: 0 --> -1 {line 6, position 11}
+{
+    nm0 : val
+}
+nm1 : val
+

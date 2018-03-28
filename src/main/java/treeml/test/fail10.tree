@@ -1,0 +1,6 @@
+#result::fail
+#error::Unterminated {line 7, position 0}
+{
+    nm0 : val
+
+

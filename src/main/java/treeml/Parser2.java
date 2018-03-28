@@ -86,6 +86,10 @@ public class Parser2 extends ParserBase {
             newline((char) c, state);
             c = reader.read();
         }
+        group = group.read(root, '\n', state);
+        if ((state.curlySyntax && state.indent != -1) || (!state.curlySyntax && !group.equals(StartOfLine.I))) {
+            throw new RuntimeException(String.format("Unterminated {line %s, position %s}", state.lineNumber, state.lineIndex));
+        }
         validate(root, schema);
         for (Listener listener : state.listeners) {
             listener.onEnd();
@@ -113,7 +117,7 @@ public class Parser2 extends ParserBase {
 
 
     private static void addNode(RootNode root, State state, Group group) {
-        if (state.indent > (state.previousIndent + 1)) {
+        if (state.indent < 0 || state.indent > (state.previousIndent + 1)) {
             throw new RuntimeException(String.format("Illegal indent: %s --> %s {line %s, position %s}", state.previousIndent, state.indent, state.lineNumber, state.lineIndex));
         }
         if (!state.streaming) root.append(state.indent, state.node);

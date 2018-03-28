@@ -1,0 +1,7 @@
+#result::ok
+#todo::should be a failure }{ should not cancel out
+{
+    nm : val
+} {
+    nm : val
+}
