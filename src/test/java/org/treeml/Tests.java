@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.*;
 
 public class Tests {
 
@@ -28,13 +28,13 @@ public class Tests {
         File testDir = testDir();
         assert testDir.listFiles() != null;
         TagListener tl = new TagListener();
-        Parser2 parser = new Parser2(new Parser2.Options(false, false, false), Collections.singletonList(tl));
         int ok=0, notok=0;
         //noinspection ConstantConditions
         for (File f : testDir.listFiles()) {
             tl.tags.clear();
             RootNode doc = null;
             try {
+                Parser2 parser = new Parser2(new Parser2.Options(false, false, false, false), Collections.singletonList(tl));
                 doc = (RootNode)parser.parse(f);
                 boolean failIntended = "fail".equals(tl.tags.get("result"));
                 if (failIntended) {
@@ -52,7 +52,10 @@ public class Tests {
                 } else {
                     System.out.println("FAILURE Expected " + tl.tags.get("result") + ", got fail - " + f.getName());
                     System.out.println("---" + e.getMessage() + "---");
-                    e.printStackTrace();
+                    for (StackTraceElement element : e.getStackTrace()) {
+                        System.out.println(element);
+                    }
+
                     notok++;
                 }
             }

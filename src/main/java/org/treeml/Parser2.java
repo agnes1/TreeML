@@ -22,18 +22,19 @@ public class Parser2 extends ParserBase {
     }
 
     public static class Options {
-        final boolean verbose, timed, streaming;
+        final boolean verbose, timed, streaming, character;
 
-        public Options(boolean verbose, boolean timed, boolean streaming) {
+        public Options(boolean verbose, boolean timed, boolean streaming, boolean character) {
             this.verbose = verbose;
             this.timed = timed;
             this.streaming = streaming;
+            this.character = character;
         }
     }
 
     @SuppressWarnings("unused")
     public Parser2() {
-        options = new Options(false, false, false);
+        options = new Options(false, false, false, false);
     }
 
     public Parser2(Options options, List<Listener> listeners) {
@@ -49,7 +50,7 @@ public class Parser2 extends ParserBase {
 
     public static void main(String[] args) throws IOException {
         System.out.println("Usage: pathToTreeMLFile optionalPathToTreeMLSchema");
-        boolean verbose = false, timed = false, streaming = false;
+        boolean verbose = false, timed = false, streaming = false, character = false;
         for (int i = 1; i < args.length; i++) {
             if ("verbose".equals(args[i])) {
                 verbose = true;
@@ -60,14 +61,25 @@ public class Parser2 extends ParserBase {
             if ("streaming".equals(args[i])) {
                 streaming = true;
             }
+            if ("character".equals(args[i])) {
+                character = true;
+            }
         }
-        Parser2 parser = new Parser2(new Options(verbose, timed, streaming), new ArrayList<>(1));
+        Parser2 parser = new Parser2(new Options(verbose, timed, streaming, character), new ArrayList<>(1));
         Node node = parser.parse(new FileReader(args[0]));
         System.out.println(node);
     }
 
     protected Node doParse(Reader input, Schema schema) throws IOException {
-        State state = new State(options.streaming, listeners);
+        State state = new State(listeners);
+        DomListener dom = new DomListener();
+        CharacterListener characterListener = new CharacterListener();
+        if (!options.streaming) {
+            state.listeners.add(dom);
+        }
+        if (options.character) {
+            state.listeners.add(characterListener);
+        }
         for (Listener listener : state.listeners) {
             listener.onStart();
         }
@@ -94,7 +106,7 @@ public class Parser2 extends ParserBase {
         for (Listener listener : state.listeners) {
             listener.onEnd();
         }
-        return root;
+        return dom.getDocument();
     }
 
     private void location(State state) {
@@ -116,20 +128,18 @@ public class Parser2 extends ParserBase {
     }
 
 
-    private static void addNode(RootNode root, State state, Group group) {
+    private static void addNode(State state, Group group) {
         if (state.indent < 0 || state.indent > (state.previousIndent + 1)) {
             throw new RuntimeException(String.format("Illegal indent: %s --> %s {line %s, position %s}", state.previousIndent, state.indent, state.lineNumber, state.lineIndex));
         }
-        if (!state.streaming) root.append(state.indent, state.node);
         state.previousIndent = state.indent;
         for (Listener listener : state.listeners) {
-            listener.onAddNode(state.node.name, state.indent, state.index, state.lineNumber, state.lineIndex, group);
+            listener.onAddNode(state.indent, state.index, state.lineNumber, state.lineIndex, group);
         }
         state.endStatement();
     }
 
     public class State {
-        private final boolean streaming;
         private final List<Listener> listeners;
         int lineNumber = 1;
         public int index;
@@ -137,12 +147,10 @@ public class Parser2 extends ParserBase {
         public StringBuilder buffer;
         public boolean curlySyntax;
         public int indent, previousIndent = -1;
-        public Node node;
         public boolean escape;
         public Types type;
 
-        public State(boolean streaming, List<Listener> listeners) {
-            this.streaming = streaming;
+        public State(List<Listener> listeners) {
             this.listeners = listeners;
         }
 
@@ -151,7 +159,6 @@ public class Parser2 extends ParserBase {
                 indent = 0;
             }
             buffer = null;
-            node = null;
         }
     }
 
@@ -234,7 +241,10 @@ public class Parser2 extends ParserBase {
                 }
                 state.buffer.append(c);
             } else {
-                state.node = new Node(state.buffer.toString(), null);
+                String name = state.buffer.toString();
+                for (Listener listener : state.listeners) {
+                    listener.onNodeName(name, state.indent, state.index, state.lineNumber, state.lineIndex, this);
+                }
                 return Group.getGroup(root, c, state, InterStage.I);
             }
             return this;
@@ -250,7 +260,7 @@ public class Parser2 extends ParserBase {
                 ignore();
                 return this;
             } else if (c == ':') {
-                return Group.getGroup(root, ' ', state, Value.I);
+                return Group.getGroup(root, ' ', state, BeforeValue.I);
             }
             throw new RuntimeException(String.format("Name:Value not separated by legal character: %s {line %s, position %s}", c, state.lineNumber, state.lineIndex));
         }
@@ -396,7 +406,6 @@ public class Parser2 extends ParserBase {
     }
 
     private static Group addValue(RootNode root, Object value, State state, char c, Group group) {
-        state.node.addValue(value);
         for (Listener listener : state.listeners) {
             listener.onAddValue(value, state.type, state.indent, state.index, state.lineNumber, state.lineIndex, group);
         }
@@ -404,8 +413,8 @@ public class Parser2 extends ParserBase {
         return Group.getGroup(root, c, state, AfterValue.I);
     }
 
-public static class Value implements Group {
-    public static final Value I = new Value();
+public static class BeforeValue implements Group {
+    public static final BeforeValue I = new BeforeValue();
 
     @Override
     public Group read(RootNode root, char c, State state) {
@@ -427,6 +436,11 @@ public static class Value implements Group {
             return Group.getGroup(root, c, state, NumberValue.I);
         } else if (c == '\n') {
             return Group.getGroup(root, c, state, AfterValue.I);
+        } else if (c == ',') {
+            for (Listener listener : state.listeners) {
+                listener.onDeclareList(state.indent, state.index, state.lineNumber, state.lineIndex, this);
+            }
+            return Group.getGroup(root, c, state, AfterValue.I);
         } else if (c == '{' && state.curlySyntax) {
             return addValue(root, null, state, c, this);
         } else if (c == '}' && state.curlySyntax) {
@@ -445,19 +459,22 @@ public static class AfterValue implements Group {
         if (c == ' ' || c == '\t') {
             return this;
         } else if (state.curlySyntax && c == '{') {
-            addNode(root, state, this);
+            addNode(state, this);
             state.indent++;
             return Group.getGroup(root, ' ', state, StartOfLine.I);
         } else if (state.curlySyntax && c == '}') {
-            addNode(root, state, this);
+            addNode(state, this);
             state.indent--;
             return Group.getGroup(root, ' ', state, StartOfLine.I);
         } else if (c == '\\') {
             return Group.getGroup(root, c, state, Continuation.I);
         } else if (c == ',') {
-            return Group.getGroup(root, ' ', state, Value.I);
+            for (Listener listener : state.listeners) {
+                listener.onDeclareList(state.indent, state.index, state.lineNumber, state.lineIndex, this);
+            }
+            return Group.getGroup(root, ' ', state, BeforeValue.I);
         } else if (c == '\n' || c == '/') {
-            addNode(root, state, this);
+            addNode(state, this);
             return Group.getGroup(root, c, state, StartOfLine.I);
         }
         throw new RuntimeException(String.format("AfterValue not separated by legal character: %s {line %s, position %s}", c, state.lineNumber, state.lineIndex));
@@ -473,7 +490,7 @@ public static class Continuation implements Group {
             state.buffer = new StringBuilder();
             return this;
         } else if (c == '\n') {
-            return Group.getGroup(root, ' ', state, Value.I);
+            return Group.getGroup(root, ' ', state, BeforeValue.I);
         } else if (c == ' ') {
             return this;
         } else {
@@ -482,7 +499,7 @@ public static class Continuation implements Group {
                 return this;
             }
             if (" \t".indexOf(c) == -1) {
-                addNode(root, state, this);
+                addNode(state, this);
                 if (!state.curlySyntax) {
                     state.indent = state.buffer.length();
                 }
