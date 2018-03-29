@@ -1,10 +1,10 @@
-package treeml;
+package org.treeml;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A treeml file is parsed into nodes.
+ * A org.treeml file is parsed into nodes.
  * Each node is on a separate line, and each line has a node
  * with the exception of comment lines.
  * Created by Ags on 6/26/2016.

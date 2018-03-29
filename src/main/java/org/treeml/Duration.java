@@ -1,4 +1,4 @@
-package treeml;
+package org.treeml;
 
 public class Duration {
     public final String value;

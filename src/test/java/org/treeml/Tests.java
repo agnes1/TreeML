@@ -1,4 +1,6 @@
-package treeml;
+package org.treeml;
+
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,10 +9,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Test {
+import static junit.framework.TestCase.assertTrue;
 
-    public static void main(String[] args) throws IOException {
-        File testDir = new File(args[0]);
+public class Tests {
+
+    private File testDir(){
+        String relPath = getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
+        File targetDir = new File(relPath + "test");
+        if(!targetDir.exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            targetDir.mkdir();
+        }
+        return targetDir;
+    }
+
+    @Test
+    public void test() throws IOException {
+        File testDir = testDir();
         assert testDir.listFiles() != null;
         TagListener tl = new TagListener();
         Parser2 parser = new Parser2(new Parser2.Options(false, false, false), Collections.singletonList(tl));
@@ -85,6 +100,7 @@ public class Test {
             System.out.print("TEST PASS: ");
         }
         System.out.println(String.format(" {pass: %s; fail: %s}", ok, notok));
+        assertTrue(notok == 0);
     }
 
     private static void hashStructure(Node doc, StringBuilder sb, int indent) {

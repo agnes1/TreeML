@@ -1,4 +1,4 @@
-package treeml;
+package org.treeml;
 
 import java.io.IOException;
 import java.util.*;
@@ -26,15 +26,15 @@ public class Dependency {
     }
 
     public static void main(String[] args) throws IOException {
-        final String items = "/encyclopedia/items.treeml";
-        final String itemsAnimalParts = "/encyclopedia/items-animal-parts.treeml";
+        final String items = "/encyclopedia/items.org.treeml";
+        final String itemsAnimalParts = "/encyclopedia/items-animal-parts.org.treeml";
         DocumentGroup dg = new DocumentGroup();
         dg.documents.add(items);
         dg.documents.add(itemsAnimalParts);
         dg.path = Arrays.asList("item", "id", "nodeValue");
         Dependency dp = new Dependency();
         final Map<Integer, String> brokenReferences = dp.checkReferences(
-                "/encyclopedia/creatures.treeml",
+                "/encyclopedia/creatures.org.treeml",
                 Arrays.asList("creature", "parts", "token", "nodeName"),
                 dg
         );

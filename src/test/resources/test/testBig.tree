@@ -1,3 +1,5 @@
+#result::ok
+#eval::k0.k2.k3(2)='v3b'
 {
  k : v
  k0 : v0

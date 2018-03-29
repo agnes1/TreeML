@@ -1,4 +1,4 @@
-package treeml;
+package org.treeml;
 
 public class DateTime {
     public final String value;

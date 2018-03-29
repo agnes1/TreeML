@@ -1,4 +1,4 @@
-package treeml;
+package org.treeml;
 
 public class VerboseListener implements Listener {
     @Override

@@ -1,4 +1,4 @@
-package treeml;
+package org.treeml;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,8 @@ import java.util.List;
  * Created by Ags on 6/25/2016.
  */
 class SchemaNode {
-    Schema schema;
+    @SuppressWarnings("FieldCanBeLocal")
+    private Schema schema;
     String name;
     SchemaNode next;
     SchemaNode previous;
@@ -30,11 +31,11 @@ class SchemaNode {
     boolean hasEnum;
     List<String> enumVals = new ArrayList<>();
 
-    public SchemaNode(Schema schema) {
+    SchemaNode(Schema schema) {
         this.schema = schema;
     }
 
-    public boolean hasMandatoryChildren() {
+    boolean hasMandatoryChildren() {
         for (SchemaNode child : children) {
             if (!child.optional) {
                 return true;

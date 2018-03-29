@@ -1,4 +1,4 @@
-package treeml;
+package org.treeml;
 
 import java.io.*;
 import java.util.ArrayList;

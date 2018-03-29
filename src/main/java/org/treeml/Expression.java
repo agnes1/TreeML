@@ -1,4 +1,4 @@
-package treeml;
+package org.treeml;
 
 import java.io.File;
 import java.io.IOException;
@@ -167,7 +167,7 @@ public class Expression {
 
     public static void main(String[] args) throws IOException {
         Parser2 parser = new Parser2(new Parser2.Options(false, false, false), Collections.emptyList());
-        Node doc = parser.parse(new File("C:\\Users\\agnes.clarke\\Desktop\\mongouni\\lesson4\\blog\\untitled\\src\\org\\treeml\\test\\simple3.tree"));
+        Node doc = parser.parse(new File("C:\\Users\\agnes.clarke\\Desktop\\mongouni\\lesson4\\blog\\untitled\\src\\org\\org.treeml\\test\\simple3.tree"));
         System.out.println(Expression.eval(doc, "nm[:'urf'].name[1](2)"));
     }
 }

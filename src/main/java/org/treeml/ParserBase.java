@@ -1,4 +1,4 @@
-package treeml;
+package org.treeml;
 
 import java.io.*;
 import java.util.List;
@@ -74,7 +74,7 @@ public abstract class ParserBase {
     }
 
     public final Schema parseSchema(Reader inputSchema) throws IOException {
-        final InputStream schemaSchemaStream = Schema.class.getResourceAsStream("/org/treeml/schema-schema.treeml");
+        final InputStream schemaSchemaStream = Schema.class.getResourceAsStream("/org/org.treeml/schema-schema.org.treeml");
         Reader ssr = new InputStreamReader(schemaSchemaStream);
         Node schemaSchemaDocument = parse(ssr);
         Schema schema = new Schema(schemaSchemaDocument);
