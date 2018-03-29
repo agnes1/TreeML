@@ -18,7 +18,6 @@ public class Node {
     public Node next;
     public List<Node> children = new ArrayList<>();
     public int line;
-    private int valueSets = 0;
 
     public Node(String name, Object value) {
         this.name = name;
@@ -35,21 +34,6 @@ public class Node {
         sb.append(indent).append(node.name).append("---").append(node.value).append("\r\n");
         for (Node child : node.children) {
             toStringHelper(sb, child, indent + "  ");
-        }
-    }
-
-    public void addValue(Object v) {
-        valueSets++;
-        if (value == null && valueSets == 1) {
-            value = v;
-        } else if (valueSets > 2) {
-            //noinspection unchecked,ConstantConditions
-            ((List)value).add(v);
-        } else {
-            List<Object> list = new ArrayList<>();
-            list.add(value);
-            list.add(v);
-            value = list;
         }
     }
 }

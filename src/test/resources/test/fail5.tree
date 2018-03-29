@@ -1,4 +1,7 @@
-#result::fail
+#result::ok
 #error::Value invalid start character: , {line 3, position 10}
+#eval::name[0](listSize)=4
+#eval::name[1](listSize)=0
 { name : ,1, 2, 3, 4
+  name : ,
 }

@@ -1,4 +1,4 @@
 #result::fail
-#error::Value invalid start character: , {line 3, position 18}
+#error::Repeated comma {line 3, position 18}
 { name : 1, 2, 3,, 4
 }

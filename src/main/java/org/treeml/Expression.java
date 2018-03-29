@@ -58,6 +58,8 @@ public class Expression {
                     return node.value instanceof Boolean;
                 } else if ("(list)".equals(function)) {
                     return node.value instanceof List<?>;
+                } else if ("(listSize)".equals(function)) {
+                    return (long)((List<?>)node.value).size();
                 } else if (function.matches("\\([0-9]+\\)")) {
                     if (! (node.value instanceof List<?>) ) {
                         throw new RuntimeException("List function used on non-list value: " + node.value);

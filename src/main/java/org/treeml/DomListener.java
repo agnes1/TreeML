@@ -1,12 +1,16 @@
 package org.treeml;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+@SuppressWarnings("WeakerAccess")
 public class DomListener implements Listener {
 
     private RootNode root;
     private Node currentNode;
     private AtomicBoolean running = new AtomicBoolean(false);
+    private boolean valueSet;
 
     @SuppressWarnings("unused")
     public RootNode getDocument() {
@@ -35,16 +39,32 @@ public class DomListener implements Listener {
     public void onAddNode(int indent, int index, int line, int lineIndex, Parser2.Group currentGroup) {
         root.append(indent, currentNode);
         currentNode = null;
+        valueSet = false;
     }
 
     @Override
     public void onAddValue(Object value, Parser2.Types type, int indent, int index, int line, int lineIndex, Parser2.Group currentGroup) {
-        currentNode.addValue(value);
+        valueSet = true;
+        if (currentNode.value != null && currentNode.value instanceof List<?>) {
+            //noinspection unchecked
+            ((List<Object>) currentNode.value).add(value);
+        } else {
+            currentNode.value = value;
+        }
     }
 
     @Override
     public void onDeclareList(int indent, int index, int line, int lineIndex, Parser2.Group currentGroup) {
-
+        //noinspection StatementWithEmptyBody
+        if (currentNode.value != null && currentNode.value instanceof List<?>) {
+            //do nothing
+        } else {
+            List<Object> list = new ArrayList<>();
+            if (valueSet) {
+                list.add(currentNode.value);
+            }
+            currentNode.value = list;
+        }
     }
 
     @Override

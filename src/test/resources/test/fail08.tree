@@ -1,5 +1,5 @@
-#result::ok
-#todo::should be a failure }{ should not cancel out
+#result::fail
+#error::Illogical curly braces {line 5, position 3}
 {
     nm : val
 } {

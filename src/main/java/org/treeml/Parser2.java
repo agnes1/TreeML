@@ -94,6 +94,9 @@ public class Parser2 extends ParserBase {
                 for (Listener listener : state.listeners) {
                     listener.onCharacter((char) c, state.indent, state.index, state.lineNumber, state.lineIndex, group);
                 }
+                if (" \t\n".indexOf(c) < 0) {
+                    state.lastSignificantChar = (char)c;
+                }
             }
             newline((char) c, state);
             c = reader.read();
@@ -139,6 +142,12 @@ public class Parser2 extends ParserBase {
         state.endStatement();
     }
 
+    private static void ensureCleanCurly(char c, char c2, int line, int position) {
+        if ((c == '{' && c2 == '}') || (c2 == '{' && c == '}')) {
+            throw new RuntimeException(String.format("Illogical curly braces {line %s, position %s}", line, position));
+        }
+    }
+
     public class State {
         private final List<Listener> listeners;
         int lineNumber = 1;
@@ -149,6 +158,7 @@ public class Parser2 extends ParserBase {
         public int indent, previousIndent = -1;
         public boolean escape;
         public Types type;
+        public char lastSignificantChar;
 
         public State(List<Listener> listeners) {
             this.listeners = listeners;
@@ -212,8 +222,10 @@ public class Parser2 extends ParserBase {
             } else if (c == '\t' && !state.curlySyntax) {
                 state.indent++;
             } else if (c == '{' && state.curlySyntax) {
+                ensureCleanCurly(c, state.lastSignificantChar, state.lineNumber, state.lineIndex);
                 state.indent++;
             } else if (c == '}' && state.curlySyntax) {
+                ensureCleanCurly(c, state.lastSignificantChar, state.lineNumber, state.lineIndex);
                 state.indent--;
             } else if (c == '\n' || c == '\\') {
                 state.endStatement();
@@ -437,11 +449,15 @@ public static class BeforeValue implements Group {
         } else if (c == '\n') {
             return Group.getGroup(root, c, state, AfterValue.I);
         } else if (c == ',') {
+            if (state.lastSignificantChar == ',') {
+                throw new RuntimeException(String.format("Repeated comma {line %s, position %s}", state.lineNumber, state.lineIndex));
+            }
             for (Listener listener : state.listeners) {
                 listener.onDeclareList(state.indent, state.index, state.lineNumber, state.lineIndex, this);
             }
             return Group.getGroup(root, c, state, AfterValue.I);
         } else if (c == '{' && state.curlySyntax) {
+            ensureCleanCurly(c, state.lastSignificantChar, state.lineNumber, state.lineIndex);
             return addValue(root, null, state, c, this);
         } else if (c == '}' && state.curlySyntax) {
             return addValue(root, null, state, c, this);
@@ -469,6 +485,9 @@ public static class AfterValue implements Group {
         } else if (c == '\\') {
             return Group.getGroup(root, c, state, Continuation.I);
         } else if (c == ',') {
+            if (state.lastSignificantChar == ',') {
+                throw new RuntimeException(String.format("Repeated comma {line %s, position %s}", state.lineNumber, state.lineIndex));
+            }
             for (Listener listener : state.listeners) {
                 listener.onDeclareList(state.indent, state.index, state.lineNumber, state.lineIndex, this);
             }
