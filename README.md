@@ -20,33 +20,37 @@ Micro ML parser with validation and expression language.
 
 ## Basic document
 
-  address {
-      number : "37a"
-      street : "Main Street"
-      line : "Megacity One"
-      line : "Eastern Wasteland"
-      zip : "12345ABC"
-      country : "Narnia"
-      email : "abc@example.com", "ab.cee@example.com"
-      phone {
-          land : "00 99 1234 56789"
-          mobile : "00 99 9876 56789"
-      }
-  }
+```
+address {
+    number : "37a"
+    street : "Main Street"
+    line : "Megacity One"
+    line : "Eastern Wasteland"
+    zip : "12345ABC"
+    country : "Narnia"
+    email : "abc@example.com", "ab.cee@example.com"
+    phone {
+        land : "00 99 1234 56789"
+        mobile : "00 99 9876 56789"
+    }
+}
+```
 
 ## Basic schema
 
-  #treeml:type:schema
-  #treeml:id::address
-  address : single, {
-      number : string, single
-      street : string, single
-      line : string, optional
-      zip : string, single
-      country : string, single
-      email : single, optional, list, string
-      phone : empty, {
-          land : string, optional, single
-          mobile : string, optional, single
-      }
-  }
+```
+#treeml:type:schema
+#treeml:id::address
+address : single, {
+    number : string, single
+    street : string, single
+    line : string, optional
+    zip : string, single
+    country : string, single
+    email : single, optional, list, string
+    phone : empty, {
+        land : string, optional, single
+        mobile : string, optional, single
+    }
+}
+```
