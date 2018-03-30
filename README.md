@@ -21,7 +21,7 @@ Micro ML parser with validation and expression language.
 ## Basic document
 
 ```
-address {
+address : {
     number : "37a"
     street : "Main Street"
     line : "Megacity One"
