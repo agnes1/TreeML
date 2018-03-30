@@ -8,12 +8,7 @@ import java.util.*;
  */
 @SuppressWarnings({"Convert2streamapi", "WeakerAccess"})
 public class Schema {
-    public Map<Node, SchemaNode> validated = new HashMap<>();
-
     static final Schema PASS = new Schema(new RootNode()) {
-        @Override
-        public void validateNode(List<Node> nodeStack, Node parent, Schema schema) {
-        }
     };
     SchemaNode start = new SchemaNode(this);
 
@@ -23,92 +18,6 @@ public class Schema {
         if (schemaDocument.children.size() > 0) {
             start.next = makeSchemaNode(schemaDocument.children.get(0));
             start.children.add(start.next);
-        }
-    }
-
-    /**
-     * Verify that the node matches the definition, and apply the schema type to the value.
-     */
-    public void validateNode(List<Node> nodeStack, Node node, Schema schema) {
-        Node parent = nodeStack.get(nodeStack.size() - 1);
-        SchemaNode ancestrySn = validated.get(parent);
-        if (ancestrySn != null) {
-            boolean matched = false;
-            for (int i = nodeStack.size() - 1; i >= 1; i--) {
-                final Node ancestor = nodeStack.get(i);
-                if (nameMatch(ancestor, ancestrySn)) {
-                    matched = true;
-                    break;
-                }
-            }
-            if (!matched) {
-                throw new RuntimeException("Ancestor does not match. Expected: " + nodeStack + " got " + ancestrySn.name);
-            }
-        }
-        SchemaNode matchedSn = null;
-        if (ancestrySn == null) {
-            matchedSn = schema.start.next;
-        } else {
-            boolean matched = false;
-            for (SchemaNode childSn : ancestrySn.children) {
-                if (nameMatch(node, childSn)) {
-                    matched = true;
-                    matchedSn = childSn;
-                    break;
-                }
-            }
-            if (!matched) {
-                List<String> ls = new ArrayList<>();
-                for (SchemaNode n : ancestrySn.children) {
-                    ls.add(n.name);
-                }
-                throw new RuntimeException("Node does not match. Expected: " + ls + ", got: " + node.name);
-            }
-        }
-        validated.put(node, matchedSn);
-        previouslyValidated = node;
-    }
-
-    Node previouslyValidated = null;
-
-    void refineType(Node node) {
-        SchemaNode cursor = validated.get(node);
-        if (cursor == null) {
-            return;
-        }
-        if (cursor.list) {
-            if (!(node.value instanceof List)) {
-                String type = "string";
-                try {
-                    Object refined;
-                    if (cursor.integer) {
-                        type = "integer";
-                        refined = Collections.singletonList((Long) node.value);
-                    } else if (cursor.bool) {
-                        type = "boolean";
-                        refined = Collections.singletonList((Boolean) node.value);
-                    } else if (cursor.decimal) {
-                        type = "decimal";
-                        refined = Collections.singletonList((Double) node.value);
-                    } else {
-                        type = "stringlike";
-                        refined = Collections.singletonList((String) node.value);
-                    }
-                    node.value = refined;
-                } catch (Exception e) {
-                    throw new RuntimeException("Type mismatch: node " + node.name + " in typed " + type + " but has value of " + node.value.getClass().getSimpleName());
-                }
-            }
-        } else {
-            if (cursor.integer && !(node.value instanceof Long)) {
-                throw new RuntimeException("Type mismatch: node " + node.name + " is typed integer but has value of " + node.value.getClass().getSimpleName());
-            } else if (cursor.bool && !(node.value instanceof Boolean)) {
-                throw new RuntimeException("Type mismatch: node " + node.name + " is typed boolean but has value of " + node.value.getClass().getSimpleName());
-            } else if (cursor.decimal && !(node.value instanceof Double)) {
-                throw new RuntimeException("Type mismatch: node " + node.name + " is typed double but has value of " + node.value.getClass().getSimpleName());
-            } else if (node.value instanceof String && !(cursor.string || cursor.token || cursor.tokenid || cursor.tokenidref)) {
-                throw new RuntimeException("Type mismatch: node " + node.name + " is typed stringlike but has value of " + node.value.getClass().getSimpleName());
-            }
         }
     }
 

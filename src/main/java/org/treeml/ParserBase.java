@@ -74,11 +74,11 @@ public abstract class ParserBase {
     }
 
     public final Schema parseSchema(Reader inputSchema) throws IOException {
-        final InputStream schemaSchemaStream = Schema.class.getResourceAsStream("/org/org.treeml/schema-schema.org.treeml");
-        Reader ssr = new InputStreamReader(schemaSchemaStream);
-        Node schemaSchemaDocument = parse(ssr);
-        Schema schema = new Schema(schemaSchemaDocument);
-        final Node node = doParse(inputSchema, schema);
+        //final InputStream schemaSchemaStream = Schema.class.getResourceAsStream("/org/org.treeml/schema-schema.org.treeml");
+        //Reader ssr = new InputStreamReader(schemaSchemaStream);
+        //Node schemaSchemaDocument = parse(ssr);
+        //Schema schema = new Schema(schemaSchemaDocument);
+        final Node node = doParse(inputSchema, Schema.PASS);
         return new Schema(node);
     }
 
@@ -103,6 +103,9 @@ public abstract class ParserBase {
     protected void validate(RootNode document, Schema schema) {
         if (schema.equals(Schema.PASS)) {
             return;
+        }
+        if (document == null) {
+            throw new RuntimeException("Cannot validate document in streaming mode.");
         }
         List<SchemaNode> schemaNodes = schema.start.children;
         List<Node> docNodes = document.children;

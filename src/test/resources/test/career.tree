@@ -1,4 +1,6 @@
 #result::ok
+#eval::career[0].objective[1].entity='settlement'
+#eval::career[0].objective[0].type='receive'
 career:
 	id:beggar
 	careerName: "Beggar"

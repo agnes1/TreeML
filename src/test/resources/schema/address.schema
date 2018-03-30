@@ -1,0 +1,11 @@
+#treeml:type::schema
+#treeml:id::addressSchema
+address : empty, {
+    street : single, string
+    postCode : single, string
+    houseName : string //2a, 376, Rose Cottage
+    line : string, optional
+    city : string, single, optional
+    region : string, single, optional
+    country : string, single, optional
+}

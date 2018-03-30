@@ -1,0 +1,30 @@
+#treeml:type:schema
+#treeml:id::careerSchema
+career: empty,
+	id: single, integer
+	careerName: single, string
+	careerDescription : single, string
+	minimumLevel: single, integer
+	status: single, integer
+	reputation: single, integer
+	alignment: single, integer
+	wealth : single, token, optional
+	objective : empty, optional
+		name: single, string
+		description : single, string
+		type : single, token
+		item : single, token, optional
+		entity : single, token, optional
+		number: single, integer
+		experience : single, integer
+		repeat : single, integer
+	possession : empty, optional
+		id : token, single
+		level : integer, single
+		number: integer, single
+	exit_career : empty, optional
+		id : token, single
+		level : integer, single
+	skill : empty, optional
+		id : token, single
+		level : integer, single
