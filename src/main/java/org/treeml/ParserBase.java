@@ -124,6 +124,9 @@ public abstract class ParserBase {
         while (i < docNodes.size()) {
             Node docNode = docNodes.get(i);
             if (Schema.nameMatch(docNode, schemaNode)) {
+                if ( ! validateType(docNode, schemaNode)) {
+                    errors.put(docNode.line, "Validation error V004: " + docNode.name + " has value of wrong type.");
+                }
                 if (docNode.children.size() > 0) {
                     errors.putAll(validate(docNode.children, schemaNode.children));
                 } else if (schemaNode.hasMandatoryChildren()) {
@@ -150,5 +153,28 @@ public abstract class ParserBase {
             }
         }
         return errors;
+    }
+
+    private boolean validateType(Node docNode, SchemaNode schemaNode) {
+        if (docNode.value == null) {
+            return true;
+        }
+        Object value = docNode.value;
+        if (value instanceof String) {
+            return schemaNode.string || schemaNode.token;
+        } else if (value instanceof Long) {
+            return schemaNode.integer;
+        } else if (value instanceof Double) {
+            return schemaNode.decimal;
+        } else if (value instanceof Boolean) {
+            return schemaNode.bool;
+        } else if (value instanceof List) {
+            return schemaNode.list;
+        } else if (value instanceof Duration) {
+            return schemaNode.duration;
+        } else if (value instanceof DateTime) {
+            return schemaNode.dateTime;
+        }
+        return false;
     }
 }

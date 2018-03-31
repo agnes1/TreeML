@@ -30,6 +30,8 @@ class SchemaNode {
     boolean set;
     boolean hasEnum;
     List<String> enumVals = new ArrayList<>();
+    boolean dateTime;
+    boolean duration;
 
     SchemaNode(Schema schema) {
         this.schema = schema;

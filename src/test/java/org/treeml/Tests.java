@@ -129,10 +129,11 @@ public class Tests {
 
     @Test
     public void testSchema() {
+        File schemaDir = new File(testDir().getParent(), "schema");
         Parser2 parser = new Parser2();
         parser.parse(
-                new File("C:\\Users\\ags1\\IdeaProjects\\TreeML\\src\\test\\resources\\test\\career.tree"),
-                new File("C:\\Users\\ags1\\IdeaProjects\\TreeML\\src\\test\\resources\\schema\\career.schema"));
+                new File(testDir(), "career.tree"),
+                new File(schemaDir, "career.schema"));
     }
 
 }

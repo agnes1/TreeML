@@ -40,6 +40,8 @@ public class Schema {
         result.tokenidref = values.contains("tokenidref");
         result.integer = values.contains("integer");
         result.decimal = values.contains("decimal");
+        result.dateTime = values.contains("dateTime");
+        result.duration = values.contains("duration");
         result.bool = values.contains("boolean");
         result.empty = values.contains("empty");
         result.list = values.contains("list");

@@ -70,5 +70,6 @@ public class DomListener implements Listener {
     @Override
     public void onNodeName(String name, int indent, int index, int lineNumber, int lineIndex, Parser2.Group name1) {
         currentNode = new Node(name, null);
+        currentNode.line = lineNumber;
     }
 }

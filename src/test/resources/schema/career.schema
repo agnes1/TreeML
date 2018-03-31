@@ -1,7 +1,7 @@
 #treeml:type:schema
 #treeml:id::careerSchema
 career: empty,
-	id: single, integer
+	id: single, token
 	careerName: single, string
 	careerDescription : single, string
 	minimumLevel: single, integer
