@@ -1,0 +1,19 @@
+{ types : {
+    string : "a string"
+    boolean : true
+    integer : 123
+    decimal : 1.23
+    token : aToken
+    list : ,
+    duration : @PT4H
+    dateTime : @2017-01-01T12:53:04.123+01:00
+    string : {
+        field1 : 1
+        field2 : "string"
+        field3 : {
+            x : xx
+            x : xxx
+            x : xxxx
+        }
+    }
+} }

@@ -134,6 +134,9 @@ public class Tests {
         parser.parse(
                 new File(testDir(), "career.tree"),
                 new File(schemaDir, "career.schema"));
+        parser.parse(
+                new File(schemaDir, "types-pass-01.tree"),
+                new File(schemaDir, "types.schema"));
     }
 
 }

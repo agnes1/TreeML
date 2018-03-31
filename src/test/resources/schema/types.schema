@@ -1,0 +1,21 @@
+#treeml:type::schema
+#treeml:id::addressSchema
+{
+    types : empty, {
+        string : single, string
+        boolean : single, boolean
+        integer : single, integer
+        decimal : single, decimal
+        token : single, token
+        list : single, list
+        duration : single, duration
+        dateTime : single, dateTime
+        string : single, optional, empty {
+            field1 : integer, single
+            field2 : string, single
+            field3 : empty, {
+                x : token, optional
+            }
+        }
+    }
+}

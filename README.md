@@ -33,6 +33,7 @@ address : {
         land : "00 99 1234 56789"
         mobile : "00 99 9876 56789"
     }
+    validFrom : @2018-03-30Z
 }
 ```
 
@@ -52,5 +53,6 @@ address : single, {
         land : string, optional, single
         mobile : string, optional, single
     }
+    validFrom : dateTime, optional
 }
 ```
