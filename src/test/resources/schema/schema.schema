@@ -1,0 +1,6 @@
+#treeml:type:schema
+#treeml:id::schema
+{
+    token : list, token, idSchemaNode
+        reference : schema, idSchemaNode, optional
+}

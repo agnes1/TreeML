@@ -3,6 +3,7 @@ package org.treeml;
 import java.io.*;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 /**
  * Abstracts wot the parser does.
@@ -161,7 +162,7 @@ public abstract class ParserBase {
         }
         Object value = docNode.value;
         if (value instanceof String) {
-            return schemaNode.string || schemaNode.token;
+            return schemaNode.string || (schemaNode.token && isToken((String) value));
         } else if (value instanceof Long) {
             return schemaNode.integer;
         } else if (value instanceof Double) {
@@ -176,5 +177,10 @@ public abstract class ParserBase {
             return schemaNode.dateTime;
         }
         return false;
+    }
+
+    private static final Pattern TOKEN = Pattern.compile("[a-z][a-zA-Z0-9_]*");
+    private boolean isToken(String value) {
+        return TOKEN.matcher(value).matches();
     }
 }

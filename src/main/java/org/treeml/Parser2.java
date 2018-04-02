@@ -278,7 +278,7 @@ public class Parser2 extends ParserBase {
 
     public static class Token implements Group {
         public static final Token I = new Token();
-        public static final String allowedFirstCharacter = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_";
+        public static final String allowedFirstCharacter = "abcdefghijklmnopqrstuvwxyz_";
         public static final String allowed = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
 
         @Override
