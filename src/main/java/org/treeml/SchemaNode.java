@@ -10,7 +10,7 @@ import java.util.List;
  */
 class SchemaNode {
     @SuppressWarnings("FieldCanBeLocal")
-    private Schema schema;
+    Schema schema;
     String name;
     SchemaNode next;
     SchemaNode previous;

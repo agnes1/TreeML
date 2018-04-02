@@ -6,7 +6,7 @@
         boolean : single, boolean
         integer : single, integer
         decimal : single, decimal
-        token : single, token
+        token : single, tokenid
         list : single, list
         duration : single, duration
         dateTime : single, dateTime

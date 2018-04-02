@@ -1,4 +1,5 @@
-{ types : {
+{
+types : {
     string : "a string"
     boolean : true
     integer : 123
@@ -16,4 +17,5 @@
             x : xxxx
         }
     }
-} }
+}
+}

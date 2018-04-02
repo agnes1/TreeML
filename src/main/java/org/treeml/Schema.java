@@ -8,6 +8,8 @@ import java.util.*;
  */
 @SuppressWarnings({"Convert2streamapi", "WeakerAccess"})
 public class Schema {
+
+    Set<String> tokenids = new HashSet<>();
     static final Schema PASS = new Schema(new RootNode()) {
     };
     SchemaNode start = new SchemaNode(this);

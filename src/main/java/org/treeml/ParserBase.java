@@ -162,7 +162,9 @@ public abstract class ParserBase {
         }
         Object value = docNode.value;
         if (value instanceof String) {
-            return schemaNode.string || (schemaNode.token && isToken((String) value));
+            return (schemaNode.tokenid && isTokenId((String) value, schemaNode.schema))
+                    || schemaNode.string
+                    || (schemaNode.token && isToken((String) value));
         } else if (value instanceof Long) {
             return schemaNode.integer;
         } else if (value instanceof Double) {
@@ -182,5 +184,9 @@ public abstract class ParserBase {
     private static final Pattern TOKEN = Pattern.compile("[a-z][a-zA-Z0-9_]*");
     private boolean isToken(String value) {
         return TOKEN.matcher(value).matches();
+    }
+
+    private boolean isTokenId(String value, Schema schema) {
+        return TOKEN.matcher(value).matches() && schema.tokenids.add(value);
     }
 }
