@@ -137,6 +137,16 @@ public class Tests {
         parser.parse(
                 new File(schemaDir, "types-pass-01.tree"),
                 new File(schemaDir, "types.schema"));
+        try {
+            parser.parse(
+                    new File(schemaDir, "types-fail-01.tree"),
+                    new File(schemaDir, "types.schema"));
+        } catch (Exception e) {
+            ValidationException ex = (ValidationException) e;
+            assertTrue(ex.getErrors().size() == 2);
+            assertTrue(ex.getErrors().contains("Validation error V006: [token:a Token] token ID is not a valid token {line: 7}"));
+            assertTrue(ex.getErrors().contains("Validation error V008: [field2:aToken] tokenidref does not refer to a preceding tokenid {line: 13}"));
+        }
     }
 
 }

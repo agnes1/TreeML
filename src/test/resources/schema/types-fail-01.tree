@@ -4,7 +4,7 @@ types : {
     boolean : true
     integer : 123
     decimal : 1.23
-    token : aToken
+    token : "a Token"
     list : ,
     duration : @PT4H
     dateTime : @2017-01-01T12:53:04.123+01:00

@@ -1,8 +1,8 @@
 package org.treeml;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 /**
@@ -38,6 +38,7 @@ public abstract class ParserBase {
     }
 
 
+    @SuppressWarnings("UnusedReturnValue")
     public final Node parse(File inputFile, File inputSchemaFile) {
         try {
             return parse(
@@ -110,28 +111,26 @@ public abstract class ParserBase {
         }
         List<SchemaNode> schemaNodes = schema.start.children;
         List<Node> docNodes = document.children;
-        final TreeMap<Integer, String> validationResults = validate(docNodes, schemaNodes);
+        final List<String> validationResults = validate(docNodes, schemaNodes);
         if (validationResults.size() > 0) {
-            validationResults.values().forEach(System.out::println);
-            throw new RuntimeException("Validation failed with " + validationResults.size() + " errors.");
+            validationResults.forEach(System.out::println);
+            throw new ValidationException("Validation failed with " + validationResults.size() + " errors.", validationResults);
         }
     }
 
-    private TreeMap<Integer, String> validate(List<Node> docNodes, List<SchemaNode> schemaNodes) {
-        TreeMap<Integer, String> errors = new TreeMap<>();
+    private List<String> validate(List<Node> docNodes, List<SchemaNode> schemaNodes) {
+        List<String> errors = new ArrayList<>();
         SchemaNode schemaNode = schemaNodes.get(0);
         int i = 0;
         boolean secondOrMore = false;
         while (i < docNodes.size()) {
             Node docNode = docNodes.get(i);
             if (Schema.nameMatch(docNode, schemaNode)) {
-                if ( ! validateType(docNode, schemaNode)) {
-                    errors.put(docNode.line, "Validation error V004: " + docNode.name + " has value of wrong type.");
-                }
+                validateType(docNode, schemaNode, errors);
                 if (docNode.children.size() > 0) {
-                    errors.putAll(validate(docNode.children, schemaNode.children));
+                    errors.addAll(validate(docNode.children, schemaNode.children));
                 } else if (schemaNode.hasMandatoryChildren()) {
-                    errors.put(docNode.line, "Validation error V003: " + docNode.name + " requires children.");
+                    errors.add("Validation error V003: [" + docNode.name + "] requires children {line: " + docNode.line + "}");
                 }
                 i++;
                 if (schemaNode.single) {
@@ -142,12 +141,12 @@ public abstract class ParserBase {
                 }
             } else {
                 if (!schemaNode.optional && !secondOrMore) {
-                    errors.put(docNode.line, "Validation error V001: " + docNode.name + " not expected at line " + docNode.line + "; expected = " + schemaNode.name);
+                    errors.add("Validation error V001: [" + docNode.name + "] not expected; expected = " + schemaNode.name + " {line: " + docNode.line + "}");
                     return errors;
                 } else {
                     schemaNode = schemaNode.next;
                     if (schemaNode == null) {
-                        errors.put(docNode.line, "Validation error V002: " + docNode.name + " not expected at line " + docNode.line);
+                        errors.add("Validation error V002: [" + docNode.name + "] not expected {line: " + docNode.line + "}");
                         return errors;
                     }
                 }
@@ -156,37 +155,63 @@ public abstract class ParserBase {
         return errors;
     }
 
-    private boolean validateType(Node docNode, SchemaNode schemaNode) {
+    @SuppressWarnings("UnusedReturnValue")
+    private boolean validateType(Node docNode, SchemaNode schemaNode, List<String> errors) {
         if (docNode.value == null) {
             return true;
         }
         Object value = docNode.value;
+        boolean result = false;
         if (value instanceof String) {
-            return (schemaNode.tokenid && isTokenId((String) value, schemaNode.schema))
+            return (schemaNode.tokenid && isTokenId((String) value, docNode, schemaNode.schema, errors))
                     || schemaNode.string
-                    || (schemaNode.token && isToken((String) value));
+                    || (schemaNode.tokenidref && refersToDeclaredId(docNode, schemaNode, (String)value, errors))
+                    || (schemaNode.token && isToken((String) value, docNode, errors));
         } else if (value instanceof Long) {
-            return schemaNode.integer;
+            result = schemaNode.integer;
         } else if (value instanceof Double) {
-            return schemaNode.decimal;
+            result = schemaNode.decimal;
         } else if (value instanceof Boolean) {
-            return schemaNode.bool;
+            result = schemaNode.bool;
         } else if (value instanceof List) {
-            return schemaNode.list;
+            result = schemaNode.list;
         } else if (value instanceof Duration) {
-            return schemaNode.duration;
+            result = schemaNode.duration;
         } else if (value instanceof DateTime) {
-            return schemaNode.dateTime;
+            result = schemaNode.dateTime;
         }
+        if (!result) {
+            errors.add("Validation error V004: [" + docNode.name + "] has value of wrong type {line: " + docNode.line + "}");
+        }
+        return result;
+    }
+
+    private boolean refersToDeclaredId(Node docNode, SchemaNode schemaNode, String value, List<String> errors) {
+        if (schemaNode.schema.tokenids.contains(value)) {
+            return true;
+        }
+        errors.add("Validation error V008: [" + docNode.name + ':' + value + "] tokenidref does not refer to a preceding tokenid {line: " + docNode.line + "}");
         return false;
     }
 
     private static final Pattern TOKEN = Pattern.compile("[a-z][a-zA-Z0-9_]*");
-    private boolean isToken(String value) {
-        return TOKEN.matcher(value).matches();
+    private boolean isToken(String value, Node docNode, List<String> errors) {
+        if ( ! TOKEN.matcher(value).matches() ) {
+            errors.add("Validation error V007: [" + docNode.name + ':' + value + "] token is not a valid token {line: " + docNode.line + "}");
+        }
+        return true;
     }
 
-    private boolean isTokenId(String value, Schema schema) {
-        return TOKEN.matcher(value).matches() && schema.tokenids.add(value);
+    private boolean isTokenId(String value, Node docNode, Schema schema, List<String> errors) {
+        if (TOKEN.matcher(value).matches()) {
+            if (schema.tokenids.add(value)) {
+                return true;
+            } else {
+                errors.add("Validation error V005: [" + docNode.name + ':' + value + "] token ID is not unique {line: " + docNode.line + "}");
+            }
+        } else {
+            errors.add("Validation error V006: [" + docNode.name + ':' + value + "] token ID is not a valid token {line: " + docNode.line + "}");
+        }
+        return false;
     }
 }

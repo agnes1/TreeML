@@ -12,7 +12,7 @@
         dateTime : single, dateTime
         string : single, optional, empty {
             field1 : integer, single
-            field2 : string, single
+            field2 : tokenidref, single
             field3 : empty, {
                 x : token, optional
             }
