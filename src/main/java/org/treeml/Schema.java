@@ -33,31 +33,44 @@ public class Schema {
         SchemaNode result = new SchemaNode(this);
         result.name = node.name;
         @SuppressWarnings("unchecked")
-        List<String> values = (List<String>) node.value;
-        result.single = values.contains("single");
-        result.optional = values.contains("optional");
-        result.token = values.contains("token");
-        result.string = values.contains("string");
-        result.tokenid = values.contains("tokenid");
-        result.tokenidref = values.contains("tokenidref");
-        result.integer = values.contains("integer");
-        result.decimal = values.contains("decimal");
-        result.dateTime = values.contains("dateTime");
-        result.duration = values.contains("duration");
-        result.bool = values.contains("boolean");
-        result.empty = values.contains("empty");
-        result.list = values.contains("list");
-        result.set = values.contains("set");
-        if (values.contains("enum")) {
-            result.hasEnum = true;
-            boolean copy = false;
-            for (String value : values) {
-                if (copy) {
-                    result.enumVals.add(value);
+        List<Object> values = (List<Object>) node.value;
+        String mode = "default";
+        for (Object value : values) {
+            String s = String.valueOf(value);
+            if (mode.equals("default")) {
+                if (Arrays.asList(
+                        "single", "optional", "token", "string", "tokenid", "tokenidref",
+                        "integer", "decimal", "dateTime", "duration", "boolean", "empty",
+                        "list", "set").contains(s)) {
+                    setBoolean(result, value);
+                } else if (s.startsWith("id") && result.id == null) {
+                    result.id = s;
+                } else if (s.startsWith("id")) {
+                    throw new RuntimeException("Duplicate ID declared for schema node {line: " + node.line + "}");
+                } else if (s.startsWith("choice") && result.choice == null) {
+                    result.choice = s;
+                } else if (s.startsWith("choice")) {
+                    throw new RuntimeException("Duplicate choice group declared for schema node {line: " + node.line + "}");
+                } else if (s.startsWith("enum")) {
+                    mode = "enum";//todo:
+                } else if (s.startsWith("range")) {
+                    mode = "range";//todo:
+                } else if (s.startsWith("items")) {
+                    result.list = true;
+                    mode = "items";//todo:
                 }
-                copy = copy || "enum".equals(value);
             }
         }
+//        if (values.contains("enum")) {
+//            result.hasEnum = true;
+//            boolean copy = false;
+//            for (String value : values) {
+//                if (copy) {
+//                    result.enumVals.add(value);
+//                }
+//                copy = copy || "enum".equals(value);
+//            }
+//        }
         SchemaNode prev = null;
         for (Node child : node.children) {
             final SchemaNode n = makeSchemaNode(child);
@@ -71,6 +84,38 @@ public class Schema {
         }
 
         return result;
+    }
+
+    private void setBoolean(SchemaNode result, Object value) {
+        if (value.equals("single")) {
+            result.single = true;
+        } else if (value.equals("optional")) {
+            result.optional = true;
+        } else if (value.equals("token")) {
+            result.token = true;
+        } else if (value.equals("string")) {
+            result.string = true;
+        } else if (value.equals("tokenid")) {
+            result.tokenid = true;
+        } else if (value.equals("tokenidref")) {
+            result.tokenidref = true;
+        } else if (value.equals("integer")) {
+            result.integer = true;
+        } else if (value.equals("decimal")) {
+            result.decimal = true;
+        } else if (value.equals("dateTime")) {
+            result.dateTime = true;
+        } else if (value.equals("duration")) {
+            result.duration = true;
+        } else if (value.equals("boolean")) {
+            result.bool = true;
+        } else if (value.equals("empty")) {
+            result.empty = true;
+        } else if (value.equals("list")) {
+            result.list = true;
+        } else if (value.equals("set")) {
+            result.set = true;
+        }
     }
 
     public String toString() {

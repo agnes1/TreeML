@@ -32,6 +32,8 @@ class SchemaNode {
     List<String> enumVals = new ArrayList<>();
     boolean dateTime;
     boolean duration;
+    public String id;
+    public String choice;
 
     SchemaNode(Schema schema) {
         this.schema = schema;
