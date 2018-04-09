@@ -29,11 +29,14 @@ class SchemaNode {
     boolean list;
     boolean set;
     boolean hasEnum;
-    List<String> enumVals = new ArrayList<>();
+    boolean hasRange;
+    Comparable rangeMin, rangeMax;
+    List<Object> enumVals = new ArrayList<>();
     boolean dateTime;
     boolean duration;
     public String id;
-    public String choice;
+    String choice;
+    List<String> itemTypes;
 
     SchemaNode(Schema schema) {
         this.schema = schema;

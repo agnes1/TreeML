@@ -37,40 +37,49 @@ public class Schema {
         String mode = "default";
         for (Object value : values) {
             String s = String.valueOf(value);
-            if (mode.equals("default")) {
-                if (Arrays.asList(
-                        "single", "optional", "token", "string", "tokenid", "tokenidref",
-                        "integer", "decimal", "dateTime", "duration", "boolean", "empty",
-                        "list", "set").contains(s)) {
-                    setBoolean(result, value);
-                } else if (s.startsWith("id") && result.id == null) {
-                    result.id = s;
-                } else if (s.startsWith("id")) {
-                    throw new RuntimeException("Duplicate ID declared for schema node {line: " + node.line + "}");
-                } else if (s.startsWith("choice") && result.choice == null) {
-                    result.choice = s;
-                } else if (s.startsWith("choice")) {
-                    throw new RuntimeException("Duplicate choice group declared for schema node {line: " + node.line + "}");
-                } else if (s.startsWith("enum")) {
-                    mode = "enum";//todo:
-                } else if (s.startsWith("range")) {
-                    mode = "range";//todo:
-                } else if (s.startsWith("items")) {
-                    result.list = true;
-                    mode = "items";//todo:
-                }
+            switch (mode) {
+                case "default":
+                    if (Arrays.asList(
+                            "single", "optional", "token", "string", "tokenid", "tokenidref",
+                            "integer", "decimal", "dateTime", "duration", "boolean", "empty",
+                            "list", "set").contains(s)) {
+                        setBoolean(result, value);
+                    } else if (s.startsWith("id") && result.id == null) {
+                        result.id = s;
+                    } else if (s.startsWith("id")) {
+                        throw new RuntimeException("Duplicate ID declared for schema node {line: " + node.line + "}");
+                    } else if (s.startsWith("choice") && result.choice == null) {
+                        result.choice = s;
+                    } else if (s.startsWith("choice")) {
+                        throw new RuntimeException("Duplicate choice group declared for schema node {line: " + node.line + "}");
+                    } else if (s.startsWith("enum")) {
+                        result.hasEnum = true;
+                        mode = "enum";//todo:
+                    } else if (s.startsWith("range")) {
+                        result.hasRange = true;
+                        mode = "range";//todo:
+                    } else if (s.startsWith("items")) {
+                        result.list = true;
+                        mode = "items";//todo:
+                    }
+                    break;
+                case "enum":
+                    result.enumVals.add(value);
+                    break;
+                case "items":
+                    result.itemTypes.add((String) value);
+                    break;
+                case "range":
+                    if (result.rangeMin == null) {
+                        result.rangeMin = (Comparable) value;
+                    } else {
+                        result.rangeMax = (Comparable) value;
+                        mode = "default";
+                    }
+                    break;
             }
         }
-//        if (values.contains("enum")) {
-//            result.hasEnum = true;
-//            boolean copy = false;
-//            for (String value : values) {
-//                if (copy) {
-//                    result.enumVals.add(value);
-//                }
-//                copy = copy || "enum".equals(value);
-//            }
-//        }
+
         SchemaNode prev = null;
         for (Node child : node.children) {
             final SchemaNode n = makeSchemaNode(child);
